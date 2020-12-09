@@ -1,0 +1,30 @@
+# !!!DSI-CONFIG!!!
+start_x=1
+
+dtparam=audio=off
+disable_overscan=1
+dtoverlay=i2c-rtc,ds1307
+dtoverlay=hifiberry-dac
+dtparam=i2c_arm=on
+
+enable_uart=off
+
+max_framebuffers=2
+
+#  desktop display will default to the LCD (fb0)
+# This will force the specified display to be the first in the list, i.e. /dev/fb0
+# Actually this is the full set:
+# MAIN_LCD  0
+# AUX_LCD   1
+# HDMI0     2
+# SDTV      3
+# HDMI1 is only availabe on RPi4
+# HDMI1     7
+framebuffer_priority=0
+
+# increase GPU memory
+gpu_mem=112
+
+hdmi_ignore_cec_init=1
+hdmi_ignore_cec=1
+hdmi_blanking=0

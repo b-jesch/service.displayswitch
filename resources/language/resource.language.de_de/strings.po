@@ -1,0 +1,29 @@
+# Kodi Media Center language file
+msgid ""
+msgstr ""
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgctxt "#32010"
+msgid "RPi Display Switch"
+msgstr "RPi Display Umschalter"
+
+msgctxt "#32020"
+msgid "Warning: This service is only assigned to RPi Devices"
+msgstr "Achtung: Dieser Dienst ist ausschliesslich für RPi-Geräte geeignet!"
+
+
+msgctxt "#32021"
+msgid "Display Configuration couldn't changed"
+msgstr "Display Konfiguration konnte nicht geändert werden"
+
+msgctxt "#32022"
+msgid "Display configuration changed, reboot"
+msgstr "Display Konfiguration wurde geändert, starte neu"
+
+msgctxt "#32023"
+msgid "Shutdown the device now"
+msgstr "Gerät wird jetzt ausgeschaltet"
