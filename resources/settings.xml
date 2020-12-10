@@ -2,5 +2,11 @@
 <settings>
     <category label="32030">
         <setting id="current" type="text" enable="false" label="32031"/>
+        <setting type="lsep" label="32035"/>
+        <setting id="default" type="file" label="32040" default="configs/config.DSI"/>
+        <setting id="alternate" type="file" label="32041" default="configs/config.HDMI"/>
+        <setting type="lsep" label="32036"/>
+        <setting id="use_default_boot" type="bool" label="32032" default="false"/>
+        <setting id="start_config" type="enum" label="32033" lvalues="32040|32041" enable="eq(-1,true)"/>
     </category>
 </settings>

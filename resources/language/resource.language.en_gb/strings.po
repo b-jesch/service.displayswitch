@@ -34,3 +34,27 @@ msgstr ""
 msgctxt "#32031"
 msgid "current Display Setup"
 msgstr ""
+
+msgctxt "#32032"
+msgid "Always boot with the same Configuration"
+msgstr ""
+
+msgctxt "#32033"
+msgid "Use Configuration for Boot"
+msgstr ""
+
+msgctxt "#32035"
+msgid "Display Configuration Files"
+msgstr ""
+
+msgctxt "#32036"
+msgid "Boot Settings"
+msgstr ""
+
+msgctxt "#32040"
+msgid "Standard Configuration"
+msgstr ""
+
+msgctxt "#32041"
+msgid "Alternate Configuration"
+msgstr ""

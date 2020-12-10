@@ -81,7 +81,7 @@ def buttonISR(pin):
                 xbmc.sleep(5000)
                 xbmc.executebuiltin('Powerdown')
 
-            if elapsed > DEBOUNCE:
+            elif elapsed > DEBOUNCE:
 
                 kl.log('initiate configuration change and reboot')
 
@@ -103,6 +103,8 @@ def buttonISR(pin):
                     xbmc.executebuiltin('Reboot')
                 else:
                     kl.notify(LOC(32010), LOC(32021), xbmcgui.NOTIFICATION_ERROR)
+            else:
+                pass
 
 
 if __name__ == '__main__':
