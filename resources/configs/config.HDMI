@@ -1,33 +1,61 @@
-# !!!HDMI-CONFIG!!!
-start_x=1
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2009-2014 Stephan Raue (stephan@openelec.tv)
+# Copyright (C) 2016-present Team LibreELEC (https://libreelec.tv)
+################################################################################
+# Bootloader configuration - config.txt
+################################################################################
 
-dtparam=audio=off
-disable_overscan=1
+################################################################################
+# Memory (System/GPU configuration )
+################################################################################
 
-dtoverlay=i2c-rtc,ds1307
-dtoverlay=hifiberry-dac
-dtparam=i2c_arm=on
+# Default GPU memory split (do not change if you do not know what you are doing)
+  gpu_mem=128
 
-enable_uart=off
+# Configure GPU memory based on SDRAM size - overrides above setting
+  gpu_mem_256=112
+  gpu_mem_512=160
+  gpu_mem_1024=256
 
-ignore_lcd=1
-display_default_lcd=0
-max_framebuffers=2
+################################################################################
+# For overclocking and various other settings, see:
+# https://www.raspberrypi.org/documentation/configuration/config-txt.md
+################################################################################
+# Set 'force_turbo=1' to disable dynamic overclocking and enable overclocking always.
+force_turbo=0
 
-#  desktop display will default to the LCD (fb0)
-# This will force the specified display to be the first in the list, i.e. /dev/fb0
-# Actually this is the full set:
-# MAIN_LCD  0 (DSI)
-# AUX_LCD   1
-# HDMI0     2
-# SDTV      3
-# HDMI1 is only availabe on RPi4
-# HDMI1     7
-framebuffer_priority=2
-framebuffer_width=1920
-framebuffer_height=1080
+# Make display smaller to stop text spilling off the screen
+#
+# Note that the overscan settings only affect the splash screen and not Kodi.
+#
+# If you experience overscan/underscan issues the best solution is to adjust
+# your TV settings ("full pixel", "1-1 pixel" etc.). Alternatively, there is a
+# calibration menu in the Kodi GUI.
+# disable_overscan=1
 
-# increase GPU memory
-gpu_mem=112
-
+# Force HDMI even if unplugged or powered off
 hdmi_force_hotplug=1
+ignore_lcd=1
+framebuffer_priority=2
+# Doesn't sent initial active source message.
+# Avoids bringing CEC (enabled TV) out of standby and channel switch when
+# rebooting.
+hdmi_ignore_cec_init=1
+
+################################################################################
+# License keys to enable GPU hardware decoding for various codecs
+# to obtain keys visit the shop at http://www.raspberrypi.com
+################################################################################
+
+# decode_MPG2=0x00000000
+# decode_WVC1=0x00000000
+
+################################################################################
+# End of default configuration
+################################################################################
+
+################################################################################
+# Include distribution specific config file if it exists.
+################################################################################
+[all]
+include distroconfig.txt

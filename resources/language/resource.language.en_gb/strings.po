@@ -26,3 +26,11 @@ msgstr ""
 msgctxt "#32023"
 msgid "Shutdown the device now"
 msgstr ""
+
+msgctxt "#32030"
+msgid "General"
+msgstr ""
+
+msgctxt "#32031"
+msgid "current Display Setup"
+msgstr ""

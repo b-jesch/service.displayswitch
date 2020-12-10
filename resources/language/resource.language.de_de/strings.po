@@ -27,3 +27,12 @@ msgstr "Display Konfiguration wurde geändert, starte neu"
 msgctxt "#32023"
 msgid "Shutdown the device now"
 msgstr "Gerät wird jetzt ausgeschaltet"
+
+
+msgctxt "#32030"
+msgid "General"
+msgstr "Allgemein"
+
+msgctxt "#32031"
+msgid "current Display Setup"
+msgstr "aktuelle Display Einstellungen"
