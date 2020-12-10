@@ -1,4 +1,4 @@
-<h1>RPi Display Switcher</h1>
+<h1>RPi Display Switch</h1>
 
 This service is used to switch the output between the different video ports of a Raspberry Pi. For example, it is possible 
 to switch between a connected SDI device (RPi TFT Display) and a device connected to the HDMI output.
