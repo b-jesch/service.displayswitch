@@ -18,13 +18,24 @@ addon_path = xbmc.translatePath(addon.getAddonInfo('path'))
 addon_profile = xbmc.translatePath(addon.getAddonInfo('profile'))
 LOC = addon.getLocalizedString
 
-system_config_path = '/flash/config.txt'
-system_config_backup = '/flash/config.txt.origin'
+flash_path = '/flash/config.txt'
+flash_backup = '/flash/config.txt.origin'
 
-addon_config_path = os.path.join(addon_path, 'resources', 'configs')
+config_templates = os.path.join(addon_path, 'resources', 'configs')
 user_config_path = os.path.join(addon_profile, 'configs')
-user_config_1 = 'config.DSI'
-user_config_2 = 'config.HDMI'
+
+default_config_1 = 'config.DSI'
+default_config_2 = 'config.HDMI'
+
+if addon.getSetting('default') == default_config_1:
+    user_config_1 = os.path.join(user_config_path, default_config_1)
+else:
+    user_config_1 = addon.getSetting('default')
+
+if addon.getSetting('alternate') == default_config_2:
+    user_config_2 = os.path.join(user_config_path, default_config_2)
+else:
+    user_config_2 = addon.getSetting('alternate')
 
 osr = OsRelease()
 kl = KodiLib()
@@ -35,15 +46,17 @@ if osr.project != "RPi":
     kl.notify(LOC(32010), LOC(32020), xbmcgui.NOTIFICATION_WARNING)
     sys.exit(0)
 
+# Prerequisites and backups
+
+if not os.path.exists(flash_backup):
+    subprocess.call(['mount', '-o', 'remount,rw', '/flash'], shell=False)
+    xbmcvfs.copy(flash_path, flash_backup)
+    subprocess.call(['mount', '-o', 'remount,ro', '/flash'], shell=False)
+
 if not os.path.exists(user_config_path):
     xbmcvfs.mkdirs(user_config_path)
-    xbmcvfs.copy(os.path.join(addon_config_path, user_config_1), os.path.join(user_config_path, user_config_1))
-    xbmcvfs.copy(os.path.join(addon_config_path, user_config_2), os.path.join(user_config_path, user_config_2))
-
-if not os.path.exists(system_config_backup):
-    subprocess.call(['mount', '-o', 'remount,rw', '/flash'], shell=False)
-    xbmcvfs.copy(system_config_path, system_config_backup)
-    subprocess.call(['mount', '-o', 'remount,ro', '/flash'], shell=False)
+    xbmcvfs.copy(os.path.join(config_templates, default_config_1), os.path.join(user_config_path, default_config_1))
+    xbmcvfs.copy(os.path.join(config_templates, default_config_2), os.path.join(user_config_path, default_config_2))
 
 # GPIO-Port, an dem die Taste gegen GND angeschlossen ist
 # GPIO 5, Pin 29 (GND ist daneben auf Pin 30)
@@ -58,46 +71,78 @@ DEBOUNCE = 0.05
 duration = 0
 
 
-# Interrupt-Routine für den Button
+def copy_config(src):
+    try:
+        subprocess.check_call(['mount', '-o', 'remount,rw', '/flash'], shell=False)
+    except subprocess.CalledProcessError as e:
+        kl.log('Failed to remount (rw) flash: {}'.format(e.returncode))
+        return False
+    kl.log('Copy {} to flash'.format(src))
+    copied = xbmcvfs.copy(src, flash_path)
+    try:
+        subprocess.check_call(['mount', '-o', 'remount,ro', '/flash'], shell=False)
+    except subprocess.CalledProcessError as e:
+        kl.log('Failed to remount (ro) flash: {}'.format(e.returncode))
+    return copied
+
+
+# Interrupt function for PORT (GPIO)
 
 def buttonISR(pin):
 
     global duration
     if not (GPIO.input(pin)):
 
-        # Button gedrückt
+        # Button pressed
         if duration == 0: duration = time.time()
     else:
 
-        # Button losgelassen
+        # Button released
         if duration > 0:
             elapsed = (time.time() - duration)
             duration = 0
 
             if elapsed > SHUTDOWN:
-
                 kl.log('initiate shutdown')
+                if addon.getSetting('use_default_boot').lower() == "true":
+                    boot_config = [user_config_1, user_config_2]
+                    idx = int(addon.getSetting('start_config'))
+                    src = boot_config[idx]
+
+                    if copy_config(src):
+                        kl.log('Default boot configuration copied to flash')
+                        if idx == 0:
+                            ps = default_config_1 if addon.getSetting('default') == default_config_1 else user_config_1
+                        else:
+                            ps = default_config_2 if addon.getSetting('default') == default_config_2 else user_config_2
+                        addon.setSetting('current', ps)
+                    else:
+                        kl.log('Couldn\'t copy default boot configuration to flash', xbmc.LOGERROR)
+
                 kl.notify(LOC(32010), LOC(32023))
                 xbmc.sleep(5000)
                 xbmc.executebuiltin('Powerdown')
 
             elif elapsed > DEBOUNCE:
-
                 kl.log('initiate configuration change and reboot')
 
                 curr = addon.getSetting('current')
 
-                if curr == user_config_1:
+                if curr == default_config_1:
                     src = user_config_2
+                    ps = default_config_2 if addon.getSetting('alternate') == default_config_2 else user_config_2
+                elif curr == default_config_2:
+                    src = user_config_1
+                    ps = default_config_1 if addon.getSetting('default') == default_config_1 else user_config_1
+                elif curr == user_config_1:
+                    src = user_config_2
+                    ps = default_config_2 if addon.getSetting('alternate') == default_config_2 else user_config_2
                 else:
                     src = user_config_1
+                    ps = default_config_1 if addon.getSetting('default') == default_config_1 else user_config_1
 
-                subprocess.call(['mount', '-o', 'remount,rw', '/flash'], shell=False)
-                changed = xbmcvfs.copy(os.path.join(user_config_path, src), system_config_path)
-                addon.setSetting('current', src)
-                subprocess.call(['mount', '-o', 'remount,ro', '/flash'], shell=False)
-
-                if changed:
+                if copy_config(src):
+                    addon.setSetting('current', ps)
                     kl.notify(LOC(32010), LOC(32022))
                     xbmc.sleep(5000)
                     xbmc.executebuiltin('Reboot')
@@ -111,15 +156,14 @@ if __name__ == '__main__':
 
     kl.log('Service started', level=xbmc.LOGINFO)
 
-    # GPIO initialisieren, BMC-Pinnummer, Pullup-Widerstand
+    # GPIO Init, BMC-Pin, Pullup-Resistor
 
     GPIO.setwarnings(False)
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(PORT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-
-    # Interrupt für den Button einschalten
-
     GPIO.add_event_detect(PORT, GPIO.BOTH, callback=buttonISR)
+
+    # Main service loop
 
     while not monitor.abortRequested():
         if monitor.waitForAbort(600):
