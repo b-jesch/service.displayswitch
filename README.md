@@ -14,6 +14,8 @@ If the button was pressed for more than 3 seconds, a shutdown is performed witho
 The configuration files for the displays are located in the directory ```/storage/.kodi/userdata/addon_data/service.displayswitch/configs/``` and 
 should only be changed or adapted here. This prevents unintentional changes to the configuration files after an update of the addon.
 
+You'll find all possible options to create/adapt your own config settings here: https://www.raspberrypi.org/documentation/configuration/config-txt 
+
 Additionally, the first time the addon is started, the original configuration is copied to ```/flash/config.txt.origin```. If the RPi 
 does not start after a configuration change, this file on the SD card can be simply copied back to ```config.txt``` e.g. on a Windows PC 
 with a card reader.
