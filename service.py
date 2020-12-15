@@ -85,6 +85,56 @@ def copy_config(src):
         kl.log('Failed to remount (ro) flash: {}'.format(e.returncode))
     return copied
 
+def execute_command(command):
+
+    if command == 'poweroff':
+        kl.log('initiate shutdown')
+        if addon.getSetting('use_default_boot').lower() == "true":
+            boot_config = [user_config_1, user_config_2]
+            idx = int(addon.getSetting('start_config'))
+            src = boot_config[idx]
+
+            if copy_config(src):
+                kl.log('Default boot configuration copied to flash')
+                if idx == 0:
+                    ps = default_config_1 if addon.getSetting('default') == default_config_1 else user_config_1
+                else:
+                    ps = default_config_2 if addon.getSetting('default') == default_config_2 else user_config_2
+                addon.setSetting('current', ps)
+            else:
+                kl.log('Couldn\'t copy default boot configuration to flash', xbmc.LOGERROR)
+
+        kl.notify(LOC(32010), LOC(32023))
+        xbmc.sleep(5000)
+        xbmc.executebuiltin('Powerdown')
+
+    elif command == 'switch':
+        kl.log('initiate configuration change and reboot')
+        curr = addon.getSetting('current')
+
+        if curr == default_config_1:
+            src = user_config_2
+            ps = default_config_2 if addon.getSetting('alternate') == default_config_2 else user_config_2
+        elif curr == default_config_2:
+            src = user_config_1
+            ps = default_config_1 if addon.getSetting('default') == default_config_1 else user_config_1
+        elif curr == user_config_1:
+            src = user_config_2
+            ps = default_config_2 if addon.getSetting('alternate') == default_config_2 else user_config_2
+        else:
+            src = user_config_1
+            ps = default_config_1 if addon.getSetting('default') == default_config_1 else user_config_1
+
+        if copy_config(src):
+            addon.setSetting('current', ps)
+            kl.notify(LOC(32010), LOC(32022))
+            xbmc.sleep(5000)
+            xbmc.executebuiltin('Reboot')
+        else:
+            kl.notify(LOC(32010), LOC(32021), xbmcgui.NOTIFICATION_ERROR)
+    else:
+        kl.log('unknown Command: {}'.format(command), xbmc.LOGERROR)
+
 
 # Interrupt function for PORT (GPIO)
 
@@ -103,51 +153,10 @@ def buttonISR(pin):
             duration = 0
 
             if elapsed > SHUTDOWN:
-                kl.log('initiate shutdown')
-                if addon.getSetting('use_default_boot').lower() == "true":
-                    boot_config = [user_config_1, user_config_2]
-                    idx = int(addon.getSetting('start_config'))
-                    src = boot_config[idx]
-
-                    if copy_config(src):
-                        kl.log('Default boot configuration copied to flash')
-                        if idx == 0:
-                            ps = default_config_1 if addon.getSetting('default') == default_config_1 else user_config_1
-                        else:
-                            ps = default_config_2 if addon.getSetting('default') == default_config_2 else user_config_2
-                        addon.setSetting('current', ps)
-                    else:
-                        kl.log('Couldn\'t copy default boot configuration to flash', xbmc.LOGERROR)
-
-                kl.notify(LOC(32010), LOC(32023))
-                xbmc.sleep(5000)
-                xbmc.executebuiltin('Powerdown')
+                execute_command('poweroff')
 
             elif elapsed > DEBOUNCE:
-                kl.log('initiate configuration change and reboot')
-
-                curr = addon.getSetting('current')
-
-                if curr == default_config_1:
-                    src = user_config_2
-                    ps = default_config_2 if addon.getSetting('alternate') == default_config_2 else user_config_2
-                elif curr == default_config_2:
-                    src = user_config_1
-                    ps = default_config_1 if addon.getSetting('default') == default_config_1 else user_config_1
-                elif curr == user_config_1:
-                    src = user_config_2
-                    ps = default_config_2 if addon.getSetting('alternate') == default_config_2 else user_config_2
-                else:
-                    src = user_config_1
-                    ps = default_config_1 if addon.getSetting('default') == default_config_1 else user_config_1
-
-                if copy_config(src):
-                    addon.setSetting('current', ps)
-                    kl.notify(LOC(32010), LOC(32022))
-                    xbmc.sleep(5000)
-                    xbmc.executebuiltin('Reboot')
-                else:
-                    kl.notify(LOC(32010), LOC(32021), xbmcgui.NOTIFICATION_ERROR)
+                execute_command('switch')
             else:
                 pass
 
@@ -156,22 +165,30 @@ if __name__ == '__main__':
 
     kl.log('Service started', level=xbmc.LOGINFO)
 
-    # GPIO Init, BMC-Pin, Pullup-Resistor
+    try:
 
-    GPIO.setwarnings(False)
-    GPIO.setmode(GPIO.BCM)
-    GPIO.setup(PORT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-    GPIO.add_event_detect(PORT, GPIO.BOTH, callback=buttonISR)
+        if sys.argv[1]:
+            execute_command(sys.argv[1])
+            sys.exit(0)
 
-    # Main service loop
+    except IndexError:
 
-    while not monitor.abortRequested():
-        if monitor.waitForAbort(600):
-            break
-        kl.log('Service still alive')
+        # GPIO Init, BMC-Pin, Pullup-Resistor
 
-    kl.log('Abort requested, service finished', level=xbmc.LOGINFO)
+        GPIO.setwarnings(False)
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setup(PORT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+        GPIO.add_event_detect(PORT, GPIO.BOTH, callback=buttonISR)
 
-    GPIO.setmode(GPIO.BCM)
-    GPIO.remove_event_detect(PORT)
-    GPIO.cleanup(PORT)
+        # Main service loop
+
+        while not monitor.abortRequested():
+            if monitor.waitForAbort(600):
+                break
+            kl.log('Service still alive')
+
+        kl.log('Abort requested, service finished', level=xbmc.LOGINFO)
+
+        GPIO.setmode(GPIO.BCM)
+        GPIO.remove_event_detect(PORT)
+        GPIO.cleanup(PORT)
