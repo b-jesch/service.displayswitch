@@ -18,7 +18,9 @@
         <source/>
         <assets>
             <icon>icon.png</icon>
-            <fanart/>
+            <fanart>fanart.jpg</fanart>
+            <screenshot>resources/raspberry_gpio_layout.png</screenshot>
+            <screenshot>resources/hardware.jpg</screenshot>
         </assets>
         <email>birger.jesch@gmail.com</email>
     </extension>

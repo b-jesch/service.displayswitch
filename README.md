@@ -6,10 +6,12 @@ to switch between a connected SDI device (RPi TFT Display) and a device connecte
 To do this, the original config.txt is exchanged against a user-defined configuration and the RPi restarts inorder to load 
 the new configuration.
 
-To switch the display configuration a push button is connected to GPIO 5 and GND. If this button is pressed, the configuration 
+To switch the display configuration a push button is connected to GPIO 5 and GND (Pin 29 and 30 on the Pin Header). If this button is pressed, the configuration 
 files in the read-only ```/flash``` partition are exchanged and the RPi restarts.
 
 If the button was pressed for more than 3 seconds, a shutdown is performed without changing the display configuration.
+
+![Raspberry Layout](resources/raspberry_gpio_layout.png)
 
 The configuration files for the displays are located in the directory ```/storage/.kodi/userdata/addon_data/service.displayswitch/configs/``` and 
 should only be changed or adapted here. This prevents unintentional changes to the configuration files after an update of the addon.
