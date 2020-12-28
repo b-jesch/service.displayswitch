@@ -33,8 +33,6 @@ force_turbo=0
 # calibration menu in the Kodi GUI.
 # disable_overscan=1
 
-# Force HDMI even if unplugged or powered off
-  hdmi_force_hotplug=1
 
 # Doesn't sent initial active source message.
 # Avoids bringing CEC (enabled TV) out of standby and channel switch when
