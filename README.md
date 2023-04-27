@@ -29,8 +29,8 @@ are used to switch between the displays and poweroff the device:
     <keymap>
         <global>
             <keyboard>
-                <f1 mod="ctrl">XBMC.RunScript(service.displayswitch,switch)</f1>
-                <f2 mod="ctrl">XBMC.RunScript(service.displayswitch,poweroff)</f1>
+                <f1 mod="ctrl">RunScript(service.displayswitch,switch)</f1>
+                <f2 mod="ctrl">RunScript(service.displayswitch,poweroff)</f2>
             </keyboard>
         </global>
     </keymap>

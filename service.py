@@ -14,8 +14,8 @@ import xbmcvfs
 from resources.lib.tools import OsRelease, KodiLib
 
 addon = xbmcaddon.Addon(id='service.displayswitch')
-addon_path = xbmc.translatePath(addon.getAddonInfo('path'))
-addon_profile = xbmc.translatePath(addon.getAddonInfo('profile'))
+addon_path = xbmcvfs.translatePath(addon.getAddonInfo('path'))
+addon_profile = xbmcvfs.translatePath(addon.getAddonInfo('profile'))
 LOC = addon.getLocalizedString
 
 flash_path = '/flash/config.txt'
